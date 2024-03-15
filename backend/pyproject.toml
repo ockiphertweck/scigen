@@ -16,6 +16,8 @@ pydantic = "<2"
 langchain-openai = "^0.0.8"
 python-decouple = "^3.8"
 python-multipart = "^0.0.9"
+python-dotenv = "^1.0.1"
+requests = "^2.31.0"
 
 
 [tool.poetry.group.dev.dependencies]

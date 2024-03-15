@@ -1,11 +1,17 @@
+from typing import Dict
 from app.services.nougat import convert_file_to_markdown
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
 from fastapi import File, UploadFile
+import os
+from dotenv import load_dotenv
 
-
-
+load_dotenv()
+NOUGAT_URL = os.getenv('NOUGAT_URL')
+options: Dict[str, str] = {
+    "NOUGAT_URL": NOUGAT_URL
+}
 app = FastAPI()
 
 
@@ -16,7 +22,7 @@ async def redirect_root_to_docs():
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
-    response = convert_file_to_markdown(file)
+    response = await convert_file_to_markdown(file, options)
     return response
 
 
