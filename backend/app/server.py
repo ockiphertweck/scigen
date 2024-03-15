@@ -1,5 +1,5 @@
 from typing import Dict
-from app.services.nougat import convert_file_to_markdown
+from app.services.nougat import convert_file_to_markdown, ping
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
@@ -25,6 +25,11 @@ async def upload(file: UploadFile = File(...)):
     response = await convert_file_to_markdown(file, options)
     return response
 
+
+
+@app.get("/nougat/ping")
+async def ping_nougat():
+    return await ping(options)
 
 # Edit this to add the chain you want to add
 #add_routes(app, NotImplemented)

@@ -12,3 +12,7 @@ async def convert_file_to_markdown(file: UploadFile, options: Dict[str, str]):
    print(response.json())
 
    return response.json()
+
+async def ping(options: Dict[str, str]):
+   response = requests.get(options["NOUGAT_URL"])
+   return response.json()
