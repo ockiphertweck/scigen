@@ -6,7 +6,11 @@ from fastapi.responses import RedirectResponse
 from langserve import add_routes
 
 
-app = FastAPI()
+app = FastAPI(
+    title="SciGen",
+    description="API documentation for the endpoints of the SciGen service",
+    version="1.0.0"
+)
 
 app.include_router(document_router)
 
