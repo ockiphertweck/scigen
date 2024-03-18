@@ -2,17 +2,17 @@ from typing import Dict
 from fastapi import UploadFile
 import requests
 
-async def convert_file_to_markdown(file: UploadFile, options: Dict[str, str]):
+async def parsePdfToMardown(file: UploadFile, NOUGAT_URL: str):
    # Read file content
    file_content = await file.read()
    headers = {
        "Accept": "application/json",
    }
-   response = requests.post(options["NOUGAT_URL"] + "/predict", files={"file": file_content}, headers=headers)
+   response = await requests.post(NOUGAT_URL + "/predict", files={"file": file_content}, headers=headers)
    print(response.json())
 
    return response.json()
 
-async def ping(options: Dict[str, str]):
-   response = requests.get(options["NOUGAT_URL"])
-   return response.json()
+async def ping(NOUGAT_URL: str):
+   response = await requests.get(NOUGAT_URL)
+   return response
