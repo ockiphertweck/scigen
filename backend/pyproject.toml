@@ -6,6 +6,7 @@ authors = ["Philipp Hertweck <philipp.hertweck@ocki-software.de>"]
 readme = "README.md"
 packages = [
     { include = "app" },
+    { include = "streamlit" },
 ]
 
 [tool.poetry.dependencies]
@@ -19,6 +20,9 @@ python-multipart = "^0.0.9"
 python-dotenv = "^1.0.1"
 requests = "^2.31.0"
 langchain-text-splitters = "^0.0.1"
+streamlit = "^1.32.2"
+markdown = "^3.6"
+watchdog = "^4.0.0"
 
 
 [tool.poetry.group.dev.dependencies]

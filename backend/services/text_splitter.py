@@ -5,7 +5,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 
 class Splitter(str, Enum):
     """Enum of available text splitters"""
-    RECURSIVE_CHARACTER_MARKDOWN = "recursive_character_markdowb"
+    RECURSIVE_CHARACTER_MARKDOWN = "recursive_character_markdown"
     SEMANTIC = "semantic"
 
 
@@ -30,7 +30,6 @@ def split_text(text: str, chunk_size: int, chunk_overlap: int,  splitter: Splitt
         chunks =  _recursive_character_markdown(text, chunk_size, chunk_overlap)
     elif splitter == Splitter.SEMANTIC:
         raise NotImplementedError("Semantic splitter is not implemented yet")
-        pass
     else:
         raise ValueError("Invalid splitter option")
     return chunks
@@ -51,6 +50,7 @@ def _recursive_character_markdown(text: str, chunk_size: int, chunk_overlap: int
     Returns:
         List[str]: A list of chunks obtained after splitting the text.
     """
-    splitter = RecursiveCharacterTextSplitter(Language.MARKDOWN,chunk_size, chunk_overlap)
+    print("Chunk_size: ", chunk_size)
+    splitter = RecursiveCharacterTextSplitter(separators=Language.MARKDOWN, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     chunks = splitter.split_text(text)
     return chunks

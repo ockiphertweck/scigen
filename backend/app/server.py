@@ -1,5 +1,5 @@
 from typing import Dict
-from app.services.nougat import parsePdfToMardown, ping
+from services.nougat import parsePdfToMardown, ping
 from fastapi import FastAPI
 from app.document.document import router as  document_router
 from fastapi.responses import RedirectResponse
