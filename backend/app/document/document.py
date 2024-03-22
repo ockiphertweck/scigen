@@ -1,5 +1,6 @@
 import os
 from app.services.nougat import parsePdfToMardown, ping
+from app.services.text_splitter import Splitter, split_text
 from dotenv import load_dotenv
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
@@ -38,7 +39,10 @@ async def uploadDocument(file: UploadFile = File(...)):
 
     - **file**: A document file that you want to convert to markdown.
     """
-    response = await parsePdfToMardown(file, NOUGAT_URL)
+    markdown_content = await parsePdfToMardown(file, NOUGAT_URL)
+    chunked_text = split_text(markdown_content, Splitter.RECURSIVE_CHARACTER_MARKDOWN)
+    print(chunked_text[0])
+    print(len(chunked_text))
     return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Conversion successful and document stored in the database"})
 
 
@@ -58,15 +62,10 @@ async def ping_nougat():
 
     This endpoint sends a request to the Nougat service to verify it is up and running. It is useful for automated health checks or for manual verification of the service status.
     """
-    # Assuming `ping` is defined elsewhere and pings the NOUGAT_URL
     try:
-        # Assuming `ping` is a synchronous function making a request to NOUGAT_URL
-        # You may need to adjust this if `ping` is already an async function
         response = ping(NOUGAT_URL)
-        # If the request was successful, return a success message
         return {"status": "success", "message": "Nougat service is up and responsive"}
     except requests.exceptions.ConnectionError:
-        # If a connection error occurs, return a meaningful error response
         raise HTTPException(status_code=503, detail="Nougat service is not available")
 
 
