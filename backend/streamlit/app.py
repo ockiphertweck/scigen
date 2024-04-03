@@ -1,4 +1,4 @@
-from services.text_splitter import Splitter, split_text
+from services.text_splitter import Splitter, SplitterOptions, split_text
 import streamlit as st
 import pandas as pd
 
@@ -17,14 +17,15 @@ if uploaded_file is not None:
     st.write(f"Cache Key: {cache_key}")
     chunks = []
     # Check if we need to process the file (or if this exact processing was already done)
-    if 'cache_key' not in st.session_state or st.session_state['cache_key'] != cache_key:
+    if 'chunks' not in st.session_state or 'cache_key' not in st.session_state or st.session_state['cache_key'] != cache_key:
         # New processing is needed: update the cache key and process
         print("new")
         st.session_state['cache_key'] = cache_key
+        st.session_state['chunks'] = []  # Initialize the 'chunks' key in session state
         text_data = str(uploaded_file.getvalue(), 'utf-8')  # Use getvalue() for consistent behavior
 
         # Process the text based on user inputs
-        chunks = split_text(text_data, chunk_size, chunk_overlap, splitter_type)
+        chunks, references = split_text(text_data,splitter=splitter_type, splitter_options=SplitterOptions(chunk_size, chunk_overlap))
         print(len(chunks))
         # Store processed chunks in session state to avoid re-processing on reruns that don't change inputs
         st.session_state['chunks'] = chunks

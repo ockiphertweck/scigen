@@ -60,7 +60,7 @@ def split_text(text: str, splitter: Splitter, splitter_options: SplitterOptions)
         chunks = _semantic_split(data, splitter_options)
     else:
         raise ValueError("Invalid splitter option")
-    chunks = tables + chunks
+    chunks += tables
     return chunks, references
 
 
