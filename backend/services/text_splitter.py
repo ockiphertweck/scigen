@@ -30,34 +30,38 @@ class SplitterOptions:
         self.chunk_overlap = chunk_overlap
         self.tokenizer_model_name = tokenizer_model_name
 
-def split_text(text: str, splitter: Splitter, splitter_options: SplitterOptions) -> List[str]:
+def split_text(text: str, splitter: Splitter, splitter_options: SplitterOptions) -> Tuple[List[str], str]:
     """
     Splits the given text into chunks based on the specified splitter.
 
     Args:
         text (str): The text to be split.
-        chunk_size (int): The desired size of each chunk.
-        chunk_overlap (int): The amount of overlap between consecutive chunks.
         splitter (Splitter): The splitter option to be used for splitting the text.
+        splitter_options (SplitterOptions): The options to be used with the splitter.
 
     Returns:
-        List[str]: A list of chunks obtained after splitting the text.
+        Tuple[List[str], str]: A tuple containing a list of chunks obtained after splitting the text and the references.
 
     Raises:
         ValueError: If an invalid splitter option is provided.
     """
+    data: str
+    tables: List[str]
+    references: str
+    data, tables, references = _pre_process_data(text)
     chunks: List[str] = []
     if splitter == Splitter.RECURSIVE_CHARACTER_MARKDOWN:
-        chunks =  _recursive_character_markdown(text, splitter_options)
+        chunks =  _recursive_character_markdown(data, splitter_options)
     elif splitter == Splitter.SEMANTIC_TEXT_SPLITTER:
-        chunks = _semantic_text_splitter(text, splitter_options)
+        chunks = _semantic_text_splitter(data, splitter_options)
     elif splitter == Splitter.SEMANTIC_TEXT_SPLITTER_MD:
-        chunks = _semantic_text_splitter_md(text, splitter_options)
+        chunks = _semantic_text_splitter_md(data, splitter_options)
     elif splitter == Splitter.SEMANTIC_SPLIT:
-        chunks = _semantic_split(text, splitter_options)
+        chunks = _semantic_split(data, splitter_options)
     else:
         raise ValueError("Invalid splitter option")
-    return chunks
+    chunks = tables + chunks
+    return chunks, references
 
 
 def _recursive_character_markdown(text: str, splitter_options: SplitterOptions) -> List[str]:
@@ -161,7 +165,7 @@ def _extract_tables(data: str) -> Tuple[str, List[str]]:
     tables: List[str] = tables1 + tables2
     return data, tables
 
-def _extract_references(data: str) -> Tuple[str, List[str]]:
+def _extract_references(data: str) -> Tuple[str, str]:
     """
     Extracts references from the given data.
 
@@ -169,7 +173,7 @@ def _extract_references(data: str) -> Tuple[str, List[str]]:
         data (str): The input data containing references.
 
     Returns:
-        Tuple[str, List[str]]: A tuple containing the modified data and a list of extracted references.
+        Tuple[str, str]: A tuple containing the modified data and a extracted references.
     """
     search_array: List[str] = [ "## References", "# References","**References**"]
     for search_term in search_array:
@@ -177,7 +181,7 @@ def _extract_references(data: str) -> Tuple[str, List[str]]:
             data = data.split(search_term)
             return data[0], data[1]
 
-def _pre_process_data(text: str) -> Tuple[str, List[str], List[str]]:
+def _pre_process_data(text: str) -> Tuple[str, List[str], str]:
     """
     Pre-processes the given text by extracting tables and references.
 
@@ -185,7 +189,7 @@ def _pre_process_data(text: str) -> Tuple[str, List[str], List[str]]:
         text (str): The input text.
 
     Returns:
-        Tuple[str, List[str], List[str]]: A tuple containing the pre-processed data, extracted tables, and extracted references.
+        Tuple[str, List[str], str]: A tuple containing the pre-processed data, extracted tables, and extracted references.
     """
     data: str
     tables: List[str]
