@@ -1,11 +1,14 @@
 import os
-from services.nougat import parsePdfToMardown, ping
+from typing import List
+from app.services.nougat import parsePdfToMardown, ping
 from dotenv import load_dotenv
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 import requests
-from services.text_splitter import Splitter, split_text
+from app.services.text_splitter import Splitter, SplitterOptions, split_text
+from langchain_core.documents import Document
+from app.services.weaviate import store_documents
 
 
 load_dotenv()
@@ -19,7 +22,8 @@ router = APIRouter()
 
 @router.get("/document/")
 async def getDocument():
-    return {"document": ["document 1", "document 2"]}
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Not Implemented"})
+
 
 
 @router.post("/document/", 
@@ -33,18 +37,25 @@ async def getDocument():
     status_code=status.HTTP_200_OK,
     tags=["Document Processing"])
 
-async def uploadDocument(file: UploadFile = File(...)):
+async def uploadDocument(file: UploadFile = File(...), splitter: Splitter = Splitter.SEMANTIC_TEXT_SPLITTER_MD, chunk_size: int = 2000, chunk_overlap: int = 200, tokenizer_model_name: str = "gpt-4"):
     """
     Uploads a document, converts it to markdown, vectorizes it and stores it in the database.  
 
     - **file**: A document file that you want to convert to markdown.
+    - **splitter**: The splitter to use for splitting the document into chunks. Default is `Splitter.SEMANTIC_TEXT_SPLITTER_MD`.
+    - **chunk_size**: The size of each chunk in characters. Default is 2000.
+    - **chunk_overlap**: The overlap between chunks in characters. Default is 200.
+    - **tokenizer_model_name**: The name of the tokenizer model to use for tokenization. Default is "gpt-4".
+
+    Returns:
+    - A JSON response with status code 200 and a message indicating the successful conversion and storage of the document in the database.
+    - The converted markdown content of the document.
     """
     markdown_content = await parsePdfToMardown(file, NOUGAT_URL)
-    print(markdown_content)
-   # chunked_text = split_text(markdown_content, Splitter.RECURSIVE_CHARACTER_MARKDOWN)
-    #print(chunked_text[0])
-    #print(len(chunked_text))
-    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Conversion successful and document stored in the database", "markdown": markdown_content})
+    documents: List[Document]
+    documents, references = split_text(markdown_content, splitter, splitter_options=SplitterOptions(chunk_size=chunk_size, chunk_overlap=chunk_overlap, tokenizer_model_name=tokenizer_model_name), meta_data={"file_name": file.filename})
+    store_documents(documents)
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Conversion successful and document stored in the database", "markdown": markdown_content, "chunks": chunks})
 
 
 @router.get("/document/parser/ping", 
