@@ -7,7 +7,7 @@ from langchain_community.embeddings.openai import OpenAIEmbeddings
 from langchain_core.embeddings.embeddings import Embeddings
 
 
-class WeaviateConnection:
+class WeaviateClient:
     """
     A class representing a connection to the Weaviate database.
 
@@ -16,7 +16,7 @@ class WeaviateConnection:
 
     def __init__(self, schema_name: str = "Document"):
         """
-        Initializes a WeaviateConnection object.
+        Initializes a WeaviateClient object.
 
         Args:
             schema_name (str, optional): The name of the schema to be used in Weaviate. Defaults to "Document".
