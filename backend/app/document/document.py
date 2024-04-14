@@ -8,8 +8,8 @@ from pydantic import BaseModel, Field
 import requests
 from app.services.text_splitter import Splitter, SplitterOptions, split_text
 from langchain_core.documents import Document
-from app.services.weaviate import WeaviateClient, store_documents
-
+from app.services.weaviate import WeaviateClient
+from semanticscholar import SemanticScholar
 
 load_dotenv()
 NOUGAT_URL = os.getenv('NOUGAT_URL')
@@ -88,3 +88,9 @@ async def ping_nougat():
     except requests.exceptions.ConnectionError:
         raise HTTPException(
             status_code=503, detail="Nougat service is not available")
+
+
+@router.get("/document/similar")
+async def get_similar_documents(base_document_name: str, num_results: int = 5):
+    semantic_scolar_api_key = os.getenv('SEMANTIC_SCOLAR_API_KEY')
+    print(semantic_scolar_api_key)

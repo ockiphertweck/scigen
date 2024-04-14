@@ -9,13 +9,9 @@ packages = [
     { include = "streamlit" },
 ]
 
-[tool.poetry.scripts]
-start = "python server.py"
-
 [tool.poetry.dependencies]
 python = "^3.11"
 uvicorn = "^0.23.2"
-langserve = {extras = ["all"], version = ">=0.0.30"}
 pydantic = "^2.5.0"
 langchain-openai = "^0.0.8"
 python-decouple = "^3.8"
@@ -36,11 +32,15 @@ semantic-text-splitter = "^0.8.1"
 semantic-split = "^0.1.0"
 weaviate-client = "^4.5.5"
 autopep8 = "^2.1.0"
-langchain-weaviate = "^0.0.1.post1"
+semanticscholar = "^0.8.0"
+langserve = "^0.0.51"
 
 
 [tool.poetry.group.dev.dependencies]
 langchain-cli = ">=0.0.15"
+
+[tool.poetry.scripts]
+serve = "app.server:main"
 
 [build-system]
 requires = ["poetry-core"]

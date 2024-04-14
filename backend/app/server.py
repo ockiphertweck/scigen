@@ -6,7 +6,7 @@ from app.document.document import router as document_router
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
 import uvicorn
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 
 app = FastAPI(
@@ -40,9 +40,14 @@ def check_env_vars_set():
                 f"Missing required environment variable: {env_var}")
 
 
-if __name__ == "__main__":
-    # Load environment variables from .env file
-    load_dotenv()
+def main():
+    print("Server is starting...")
+    load_dotenv(find_dotenv())
 
     check_env_vars_set()
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+if __name__ == "__main__":
+    # Load environment variables from .env file
+    main()

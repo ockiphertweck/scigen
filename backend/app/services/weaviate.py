@@ -3,7 +3,7 @@ from typing import Dict, List
 from dotenv import load_dotenv, find_dotenv
 import requests
 from langchain_core.documents import Document
-from langchain_community.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_core.embeddings.embeddings import Embeddings
 
 
@@ -26,6 +26,9 @@ class WeaviateClient:
             ValueError: If the Weaviate database does not exist.
         """
         # get from env
+        data = load_dotenv(find_dotenv())
+        print(os.environ.get("OPENAI_API_KEY"))
+        print(os.getenv("OPENAI_API_KEY"))
         self.weaviate_url = os.environ.get("WEAVIATE_URL")
         self.weaviate_token = os.environ.get("WEAVIATE_TOKEN")
         self.schema_name = schema_name
@@ -39,7 +42,7 @@ class WeaviateClient:
             print("Schema does not exist, creating schema...")
             self.__create_schema()
 
-    def add_documents(self, documents: List[Document], embeddings: Embeddings = OpenAIEmbeddings()):
+    def add_documents(self, documents: List[Document], embeddings: Embeddings = None):
         """
         Stores the embeddings of documents in the Weaviate database.
 
@@ -54,6 +57,9 @@ class WeaviateClient:
             None
         """
         try:
+            if not embeddings:
+                embeddings = OpenAIEmbeddings(
+                    openai_api_key=os.getenv("OPENAI_API_KEY"))
             vectors = embeddings.embed_documents(
                 [document.page_content for document in documents])
             objects = []
