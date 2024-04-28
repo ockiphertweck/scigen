@@ -26,9 +26,6 @@ class WeaviateClient:
             ValueError: If the Weaviate database does not exist.
         """
         # get from env
-        data = load_dotenv(find_dotenv())
-        print(os.environ.get("OPENAI_API_KEY"))
-        print(os.getenv("OPENAI_API_KEY"))
         self.weaviate_url = os.environ.get("WEAVIATE_URL")
         self.weaviate_token = os.environ.get("WEAVIATE_TOKEN")
         self.schema_name = schema_name
