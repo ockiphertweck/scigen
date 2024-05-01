@@ -1,0 +1,12 @@
+### 5. Research Funding and Resource Allocation
+#### 5.1 Shifts in Funding Priorities
+- Shifts in research funding priorities due to the COVID-19 pandemic, with significant increases in grants and financial support directed towards COVID-19 related research projects.
+- Analysis of the impact on funding availability for ongoing or new research projects in non-COVID-19 areas, including potential budget cuts or reallocations.
+- Examination of changes in international funding collaborations and the emergence of new funding opportunities from governmental and non-governmental organizations focused on pandemic response and preparedness.
+- Long-term implications of these funding shifts on various scientific disciplines and their future research landscape.
+
+#### 5.2 Resource Challenges
+- Identification of key resource challenges faced by researchers during the COVID-19 pandemic, including limited access to laboratory facilities, disruptions in supply chains for essential research materials, and restricted availability of personal protective equipment (PPE).
+- Description of the strategies implemented by research institutions to mitigate resource shortages, such as sharing resources among institutions, prioritizing resource allocation to COVID-19 research, and adopting remote or virtual research methodologies where possible.
+- Impact of the pandemic on human resources, with a focus on the shift to remote work, the effect on research productivity, and the challenges in conducting collaborative international research.
+- Analysis of how the research community adapted to these challenges, including the increased reliance on digital communication tools and the acceleration of open science practices like sharing data and findings through preprint platforms.
