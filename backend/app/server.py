@@ -3,6 +3,7 @@ from typing import Dict
 from app.services.nougat import parsePdfToMardown, ping
 from fastapi import FastAPI
 from app.document.document import router as document_router
+from app.paper.paper import router as paper_router
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
 import uvicorn
@@ -16,6 +17,7 @@ app = FastAPI(
 )
 
 app.include_router(document_router)
+app.include_router(paper_router)
 
 
 @app.get("/")
@@ -33,7 +35,7 @@ def check_env_vars_set():
     :raises Exception: If any of the required environment variables are missing.
     """
     required_env_vars = ["WEAVIATE_HOST", "WEAVIATE_PORT",
-                         "WEAVIATE_GRPC_PORT", "WEAVIATE_API_KEY", "NOUGAT_URL", "OPENAI_API_KEY"]
+                         "WEAVIATE_GRPC_PORT", "WEAVIATE_API_KEY", "NOUGAT_URL", "OPENAI_API_KEY", "TAVILY_API_KEY"]
     for env_var in required_env_vars:
         if not os.getenv(env_var):
             raise Exception(

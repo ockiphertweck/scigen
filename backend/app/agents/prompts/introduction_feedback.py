@@ -1,4 +1,4 @@
-from app.graph.prompts.base import PromptBase, PromptComponent
+from app.agents.prompts.base import PromptBase, PromptComponent
 from pydantic import BaseModel
 from langchain_core.prompts.pipeline import PipelinePromptTemplate
 from langchain_core.prompts import PromptTemplate
