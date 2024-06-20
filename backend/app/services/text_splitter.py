@@ -7,7 +7,6 @@ from semantic_split import SimilarSentenceSplitter, SentenceTransformersSimilari
 from langchain_core.documents import Document
 
 
-
 class Splitter(str, Enum):
     """Enum of available text splitters"""
     RECURSIVE_CHARACTER_MARKDOWN = "recursive_character_markdown"
@@ -15,9 +14,11 @@ class Splitter(str, Enum):
     SEMANTIC_TEXT_SPLITTER_MD = "semantic_text_splitter_md"
     SEMANTIC_SPLIT = "semantic_split"
 
+
 class SplitterOptions:
     """Options for the text splitter"""
-    def __init__(self, chunk_size: int=2000, chunk_overlap: int=200, tokenizer_model_name="gpt-4"):
+
+    def __init__(self, chunk_size: int = 2000, chunk_overlap: int = 200, tokenizer_model_name="gpt-4"):
         """
         Initialize the SplitterOptions class.
 
@@ -30,7 +31,8 @@ class SplitterOptions:
         self.chunk_overlap = chunk_overlap
         self.tokenizer_model_name = tokenizer_model_name
 
-def split_text(text: str, splitter: Splitter, splitter_options: SplitterOptions, meta_data:Dict={}) -> Tuple[List[Document], str]:
+
+def split_text(text: str, splitter: Splitter, splitter_options: SplitterOptions, meta_data: Dict = {}) -> Tuple[List[Document], str]:
     """
     Splits the given text into chunks based on the specified splitter.
 
@@ -51,7 +53,7 @@ def split_text(text: str, splitter: Splitter, splitter_options: SplitterOptions,
     data, tables, references = _pre_process_data(text)
     chunks: List[str] = []
     if splitter == Splitter.RECURSIVE_CHARACTER_MARKDOWN:
-        chunks =  _recursive_character_markdown(data, splitter_options)
+        chunks = _recursive_character_markdown(data, splitter_options)
     elif splitter == Splitter.SEMANTIC_TEXT_SPLITTER:
         chunks = _semantic_text_splitter(data, splitter_options)
     elif splitter == Splitter.SEMANTIC_TEXT_SPLITTER_MD:
@@ -76,9 +78,11 @@ def _recursive_character_markdown(text: str, splitter_options: SplitterOptions) 
     Returns:
         List[str]: A list of chunks obtained after splitting the text.
     """
-    splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(separators=Language.MARKDOWN, chunk_size=splitter_options.chunk_size, chunk_overlap=splitter_options.chunk_overlap)
+    splitter: RecursiveCharacterTextSplitter = RecursiveCharacterTextSplitter(
+        separators=Language.MARKDOWN, chunk_size=splitter_options.chunk_size, chunk_overlap=splitter_options.chunk_overlap)
     chunks: List[str] = splitter.split_text(text)
     return chunks
+
 
 def _semantic_text_splitter(text: str, splitter_options: SplitterOptions) -> List[str]:
     """
@@ -92,9 +96,12 @@ def _semantic_text_splitter(text: str, splitter_options: SplitterOptions) -> Lis
     Returns:
         List[str]: A list of chunks obtained after splitting the text.
     """
-    splitter: TextSplitter = TextSplitter.from_tiktoken_model(model=splitter_options.tokenizer_model_name)
-    chunks: List[str] = splitter.chunks(text, chunk_capacity=splitter_options.chunk_size)
+    splitter: TextSplitter = TextSplitter.from_tiktoken_model(
+        model=splitter_options.tokenizer_model_name)
+    chunks: List[str] = splitter.chunks(
+        text, chunk_capacity=splitter_options.chunk_size)
     return chunks
+
 
 def _semantic_text_splitter_md(text: str, splitter_options: SplitterOptions) -> List[str]:
     """
@@ -107,9 +114,12 @@ def _semantic_text_splitter_md(text: str, splitter_options: SplitterOptions) -> 
     Returns:
         List[str]: A list of chunks obtained after splitting the text.
     """
-    splitter: MarkdownSplitter = MarkdownSplitter.from_tiktoken_model(model=splitter_options.tokenizer_model_name)
-    chunks: List[str] = splitter.chunks(text, chunk_capacity=splitter_options.chunk_size)
+    splitter: MarkdownSplitter = MarkdownSplitter.from_tiktoken_model(
+        model=splitter_options.tokenizer_model_name)
+    chunks: List[str] = splitter.chunks(
+        text, chunk_capacity=splitter_options.chunk_size)
     return chunks
+
 
 def _semantic_split(text: str, splitter_options: SplitterOptions) -> List[str]:
     """
@@ -124,9 +134,11 @@ def _semantic_split(text: str, splitter_options: SplitterOptions) -> List[str]:
     """
     model: SentenceTransformersSimilarity = SentenceTransformersSimilarity()
     sentence_splitter: SpacySentenceSplitter = SpacySentenceSplitter()
-    splitter: SimilarSentenceSplitter = SimilarSentenceSplitter(model, sentence_splitter)
+    splitter: SimilarSentenceSplitter = SimilarSentenceSplitter(
+        model, sentence_splitter)
     chunks: List[str] = splitter.split(text)
     return chunks
+
 
 def _find_and_remove_patter(data: str, pattern: str) -> Tuple[str, List[str]]:
     """
@@ -143,6 +155,7 @@ def _find_and_remove_patter(data: str, pattern: str) -> Tuple[str, List[str]]:
     for entry in found_pattern:
         data = re.sub(re.escape(entry), '', data)
     return data, found_pattern
+
 
 def _extract_tables(data: str) -> Tuple[str, List[str]]:
     """
@@ -166,6 +179,7 @@ def _extract_tables(data: str) -> Tuple[str, List[str]]:
     tables: List[str] = tables1 + tables2
     return data, tables
 
+
 def _extract_references(data: str) -> Tuple[str, str]:
     """
     Extracts references from the given data.
@@ -176,11 +190,14 @@ def _extract_references(data: str) -> Tuple[str, str]:
     Returns:
         Tuple[str, str]: A tuple containing the modified data and a extracted references.
     """
-    search_array: List[str] = [ "## References", "# References","**References**"]
+    search_array: List[str] = ["## References",
+                               "# References", "**References**"]
     for search_term in search_array:
         if data.find(search_term) != -1:
-            data = data.split(search_term)
-            return data[0], data[1]
+            data_list = data.split(search_term)
+            return data_list[0], data_list[1]
+    return "", ""
+
 
 def _pre_process_data(text: str) -> Tuple[str, List[str], str]:
     """
@@ -194,15 +211,14 @@ def _pre_process_data(text: str) -> Tuple[str, List[str], str]:
     """
     data: str
     tables: List[str]
-    references: List[str]
+    references: str
     data, tables = _extract_tables(text)
     data, references = _extract_references(text)
 
     return data, tables, references
 
 
-
-def _convert_to_langchain_document(chunks: List[str], meta_data:Dict) -> List[Document]:
+def _convert_to_langchain_document(chunks: List[str], meta_data: Dict) -> List[Document]:
     """
     Converts the given list of text chunks into LangChainDocument objects.
 
@@ -214,6 +230,7 @@ def _convert_to_langchain_document(chunks: List[str], meta_data:Dict) -> List[Do
     """
     langchain_documents: List[Document] = []
     for chunk in chunks:
-        langchain_document: Document = Document(page_content=chunk, metadata=meta_data)
+        langchain_document: Document = Document(
+            page_content=chunk, metadata=meta_data)
         langchain_documents.append(langchain_document)
     return langchain_documents

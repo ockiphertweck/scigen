@@ -1,142 +1,97 @@
+from pydantic import BaseModel
+from typing import Optional
+import threading
+from weaviate.auth import AuthCredentials
+import weaviate
 import os
-from typing import Dict, List
-from dotenv import load_dotenv, find_dotenv
-import requests
-from langchain_core.documents import Document
-from langchain_openai import OpenAIEmbeddings
-from langchain_core.embeddings.embeddings import Embeddings
+from dotenv import load_dotenv
+
+
+class WeaviateConfig(BaseModel):
+    """
+    Configuration class for Weaviate service.
+
+    Attributes:
+        auth_credentials (AuthCredentials): The authentication credentials for Weaviate.
+        http_host (str): The HTTP host of the Weaviate service.
+        grpc_host (str): The gRPC host of the Weaviate service.
+        http_port (int): The HTTP port of the Weaviate service.
+        grpc_port (int): The gRPC port of the Weaviate service.
+        http_secure (bool): Flag indicating whether the HTTP connection should be secure.
+        grpc_secure (bool): Flag indicating whether the gRPC connection should be secure.
+    """
+    auth_credentials: AuthCredentials
+    http_host: str
+    grpc_host: str
+    http_port: int
+    grpc_port: int
+    http_secure: bool
+    grpc_secure: bool
 
 
 class WeaviateClient:
     """
-    A class representing a connection to the Weaviate database.
+    A singleton client class for interacting with the Weaviate service.
 
-    This class provides methods to store embeddings, chunks, and titles in a Weaviate database.
+    This class provides a singleton instance of the Weaviate client, ensuring that only one instance
+    is created and used throughout the application.
+
+    Args:
+        config (WeaviateConfig): The configuration object containing the Weaviate connection details.
+
+    Attributes:
+        client: The Weaviate client instance.
+
     """
 
-    def __init__(self, schema_name: str = "Document"):
-        """
-        Initializes a WeaviateClient object.
+    _instance: Optional["WeaviateClient"] = None
+    _lock: threading.Lock = threading.Lock()
 
-        Args:
-            schema_name (str, optional): The name of the schema to be used in Weaviate. Defaults to "Document".
+    def __new__(cls):
+        if not cls._instance:
+            with cls._lock:
+                if not cls._instance:
+                    cls._instance = super().__new__(cls)
+                    cls._instance._initialize()
+        return cls._instance
 
-        Raises:
-            ValueError: If the Weaviate URL or token is missing.
-            ValueError: If the Weaviate database does not exist.
-        """
-        # get from env
-        self.weaviate_url = os.environ.get("WEAVIATE_URL")
-        self.weaviate_token = os.environ.get("WEAVIATE_TOKEN")
-        self.schema_name = schema_name
-        if not self.weaviate_url or not self.weaviate_token:
-            raise ValueError(
-                "Weaviate URL or token is missing, please specify in .env file.")
-        # check for database and schema
-        if not self.__is_existing():
-            raise ValueError("Weaviate database does not exist")
-        if not self.__is_schema_existing():
-            print("Schema does not exist, creating schema...")
-            self.__create_schema()
+    def _initialize(self):
+        load_dotenv()
+        config = WeaviateConfig(
+            auth_credentials=weaviate.auth.Auth.api_key(
+                os.getenv('WEAVIATE_API_KEY', "")),
+            http_host=os.getenv('WEAVIATE_HOST', 'localhost'),
+            grpc_host=os.getenv('WEAVIATE_HOST_GRPC', 'localhost'),
+            http_port=int(os.environ.get('WEAVIATE_PORT', '443')),
+            grpc_port=int(os.environ.get('WEAVIATE_GRPC_PORT', '443')),
+            http_secure=True,
+            grpc_secure=True,
+        )
+        self.client = weaviate.connect_to_custom(
+            auth_credentials=config.auth_credentials,
+            http_host=config.http_host,
+            grpc_host=config.grpc_host,
+            http_port=config.http_port,
+            grpc_port=config.grpc_port,
+            http_secure=config.http_secure,
+            grpc_secure=config.grpc_secure,
+        )
 
-    def add_documents(self, documents: List[Document], embeddings: Embeddings = None):
-        """
-        Stores the embeddings of documents in the Weaviate database.
 
-        Args:
-            documents (List[Document]): A list of Document objects to be stored.
-            embeddings (Embeddings, optional): The embeddings to be stored. Defaults to OpenAIEmbeddings().
+@staticmethod
+def create_vector_store(client, embeddings, index_name: str, text_key: str):
+    """
+    Create a WeaviateVectorStore object.
 
-        Raises:
-            Exception: If there is an error storing the embeddings.
+    Args:
+        client: The Weaviate client object.
+        embeddings: The embeddings to be used for vectorization.
+        index_name: The name of the index in Weaviate.
+        text_key: The key in the Weaviate objects that contains the text data.
 
-        Returns:
-            None
-        """
-        try:
-            if not embeddings:
-                embeddings = OpenAIEmbeddings(
-                    openai_api_key=os.getenv("OPENAI_API_KEY"))
-            vectors = embeddings.embed_documents(
-                [document.page_content for document in documents])
-            objects = []
-            for i, document in enumerate(documents):
-                object_props = {
-                    "class": self.schema_name,
-                    "properties": {
-                        "chunk": document.page_content,
-                        "metadata": document.metadata,
-                    },
-                    "vector": vectors[i],
-                }
-                objects.append(object_props)
-            payload = {"objects": objects}
-            with requests.Session() as session:
-                response = session.post(f"{self.weaviate_url}/v1/batch/objects?consistency_level=ALL",
-                                        json=payload, headers={"Authorization": f"Bearer {self.weaviate_token}"})
-                response.raise_for_status()
-        except Exception as e:
-            print(f"Error storing embeddings: {e}")
+    Returns:
+        A WeaviateVectorStore object.
 
-    def __is_existing(self):
-        """
-        Check if the Weaviate database is existing.
-
-        Returns:
-            bool: True if the database exists, False otherwise.
-        """
-        try:
-            with requests.Session() as session:
-                response = session.get(
-                    f"{self.weaviate_url}/v1/meta", headers={"Authorization": f"Bearer {self.weaviate_token}"})
-                response.raise_for_status()
-                return True
-        except Exception as e:
-            return False
-
-    def __is_schema_existing(self):
-        """
-        Check if the Weaviate database collection is existing.
-
-        Returns:
-            bool: True if the schema exists, False otherwise.
-        """
-        try:
-            with requests.Session() as session:
-                response = session.get(f"{self.weaviate_url}/v1/schema/{self.schema_name}", headers={
-                                       "Authorization": f"Bearer {self.weaviate_token}"})
-                response.raise_for_status()
-                return True
-        except Exception as e:
-            return False
-
-    def __create_schema(self):
-        """
-        Create the Weaviate database schema.
-
-        Returns:
-            None
-        """
-        try:
-            with requests.Session() as session:
-                schema = {
-                    "class": self.schema_name,
-                    "description": "The vectorized document",
-                    "properties": [
-                        {
-                            "dataType": ["text"],
-                            "description": "A chunk of text of the document",
-                            "name": "chunk"
-                        },
-                        {
-                            "dataType": ["object"],
-                            "description": "The metadata of the document",
-                            "name": "metadata"
-                        }
-                    ]
-                }
-                response = session.post(f"{self.weaviate_url}/v1/schema", json=schema, headers={
-                                        "Authorization": f"Bearer {self.weaviate_token}"})
-                response.raise_for_status()
-        except Exception as e:
-            print(f"Error creating schema: {e}")
+    """
+    from langchain_weaviate.vectorstores import WeaviateVectorStore
+    return WeaviateVectorStore(client=client, embedding=embeddings, index_name=index_name, text_key=text_key)

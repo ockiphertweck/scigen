@@ -7,14 +7,12 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 import requests
 from app.services.text_splitter import Splitter, SplitterOptions, split_text
-from langchain_core.documents import Document
-from app.services.weaviate import WeaviateClient
 from semanticscholar import SemanticScholar, PaginatedResults
 from pydantic import BaseModel
 
 
 load_dotenv()
-NOUGAT_URL = os.getenv('NOUGAT_URL')
+NOUGAT_URL = os.getenv('NOUGAT_URL', '')
 
 
 class Document(BaseModel):
@@ -36,11 +34,6 @@ class DocumentResponse(BaseModel):
 router = APIRouter()
 
 
-@router.get("/document/")
-async def getDocument():
-    return JSONResponse(status_code=status.HTTP_501_NOT_IMPLEMENTED)
-
-
 @router.post("/document/",
              summary="Upload, Convert, Vectorize, and Store Document",
              description="This endpoint allows for uploading a document file, converts it to markdown format, vectorizes the content, and stores it in the database.",
@@ -51,7 +44,7 @@ async def getDocument():
              },
              status_code=status.HTTP_200_OK,
              tags=["Document Processing"])
-async def uploadDocument(file: UploadFile = File(...), splitter: Splitter = Splitter.SEMANTIC_TEXT_SPLITTER_MD, chunk_size: int = 2000, chunk_overlap: int = 200, tokenizer_model_name: str = "gpt-4", schema_name: str = "Document"):
+async def uploadDocument(file: UploadFile = File(...), splitter: Splitter = Splitter.SEMANTIC_TEXT_SPLITTER_MD, chunk_size: int = 2000, chunk_overlap: int = 200, tokenizer_model_name: str = "gpt-4", schema_name: str = "PH_Document"):
     """
     Uploads a document, converts it to markdown, vectorizes it and stores it in the database.
 
@@ -66,13 +59,17 @@ async def uploadDocument(file: UploadFile = File(...), splitter: Splitter = Spli
     - A JSON response with status code 200 and a message indicating the successful conversion and storage of the document in the database.
     - The converted markdown content of the document.
     """
+    from app.services.weaviate import WeaviateClient, create_vector_store
+    from langchain_community.embeddings.openai import OpenAIEmbeddings
     try:
         markdown_content = await parsePdfToMardown(file, NOUGAT_URL)
-        documents: List[Document]
         documents, references = split_text(markdown_content, splitter, splitter_options=SplitterOptions(
             chunk_size=chunk_size, chunk_overlap=chunk_overlap, tokenizer_model_name=tokenizer_model_name), meta_data={"file_name": file.filename})
-        weaviate_clinet = WeaviateClient(schema_name)
-        weaviate_clinet.add_documents(documents)
+        weaviate_singleton = WeaviateClient()
+        weaviate_client = weaviate_singleton.client
+        embeddings = OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY"))
+        vectore_store = create_vector_store(
+            weaviate_client, embeddings=embeddings, index_name=schema_name, text_key="text")
         return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Conversion successful and document stored in the database"})
     except Exception as e:
         error_message = str(e)
