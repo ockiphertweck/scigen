@@ -6,7 +6,7 @@ RUN poetry config virtualenvs.create false
 
 WORKDIR /code
 
-COPY ./pyproject.toml  ./
+COPY ./pyproject.toml ./README.md  ./
 
 COPY ./package[s] ./packages
 
