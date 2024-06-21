@@ -1,13 +1,13 @@
 from app.agents.researcher import ResearchAgent
 from app.agents.state.master import MasterState
-from nanoid import generate
 import os
 from langgraph.graph import StateGraph, END
+import uuid
 
 
 class MasterResearcher:
     def __init__(self, task: dict):
-        self.task_id = generate()
+        self.task_id = str(uuid.uuid4())
         self.output_dir = f"./outputs/run_{self.task_id}"
         self.task = task
         os.makedirs(self.output_dir, exist_ok=True)
