@@ -46,7 +46,7 @@ router = APIRouter()
              },
              status_code=status.HTTP_200_OK,
              tags=["Document Processing"])
-async def uploadDocument(file: UploadFile = File(...), splitter: Splitter = Splitter.SEMANTIC_TEXT_SPLITTER_MD, chunk_size: int = 2000, chunk_overlap: int = 200, tokenizer_model_name: str = "gpt-4", schema_name: str = "PH_Document"):
+async def uploadDocument(schema_name: str, file: UploadFile = File(...), splitter: Splitter = Splitter.SEMANTIC_TEXT_SPLITTER_MD, chunk_size: int = 2000, chunk_overlap: int = 200, tokenizer_model_name: str = "gpt-4"):
     """
     Uploads a document, converts it to markdown, vectorizes it, and stores it in the database.
 
