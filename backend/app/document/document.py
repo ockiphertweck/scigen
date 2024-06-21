@@ -46,7 +46,7 @@ router = APIRouter()
              },
              status_code=status.HTTP_200_OK,
              tags=["Document Processing"])
-async def uploadDocument(file: UploadFile = File(...), splitter: Splitter = Splitter.SEMANTIC_TEXT_SPLITTER_MD, chunk_size: int = 2000, chunk_overlap: int = 200, tokenizer_model_name: str = "gpt-4", collection_name="PH_Document"):
+async def uploadDocument(file: UploadFile, data: DocumentUploadService.DocumentUploadModel):
     """
     Uploads a document, converts it to markdown, vectorizes it, and stores it in the database.
 
@@ -57,10 +57,9 @@ async def uploadDocument(file: UploadFile = File(...), splitter: Splitter = Spli
         A JSON response with status code 200 and a message indicating the successful conversion and storage of the document in the database.
     """
     try:
-        data = DocumentUploadService.DocumentUploadModel(
-            file=file, splitter=splitter, chunk_size=chunk_size, chunk_overlap=chunk_overlap, tokenizer_model_name=tokenizer_model_name, schema_name=collection_name)
+
         upload_service = DocumentUploadService()
-        result = await upload_service.perform_action(data)
+        result = await upload_service.perform_action(data, file)
         return {"result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
