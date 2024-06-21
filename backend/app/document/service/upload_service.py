@@ -20,7 +20,7 @@ class DocumentUploadService(BaseService):
 
     async def perform_action(self, data: DocumentUploadModel):
         from app.services.weaviate import WeaviateClient, create_vector_store
-        from langchain_community.embeddings.openai import OpenAIEmbeddings
+        from langchain_openai import OpenAIEmbeddings
         load_dotenv()
         try:
             print(data)
