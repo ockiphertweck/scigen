@@ -29,8 +29,7 @@ class DocumentUploadService(BaseService):
                 chunk_size=data.chunk_size, chunk_overlap=data.chunk_overlap, tokenizer_model_name=data.tokenizer_model_name), meta_data={"file_name": data.file.filename})
             weaviate_singleton = WeaviateClient()
             weaviate_client = weaviate_singleton.client
-            embeddings = OpenAIEmbeddings(
-                api_key=os.getenv("OPENAI_API_KEY", ""))
+            embeddings = OpenAIEmbeddings()
             vectore_store = create_vector_store(
                 weaviate_client, embeddings=embeddings, index_name=data.schema_name, text_key="text")
             vectore_store.add_documents(documents)
