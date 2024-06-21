@@ -29,7 +29,7 @@ RUN ls -la /code/app
 RUN poetry install --no-interaction --no-ansi
 
 # Expose the port
-EXPOSE 8080
+EXPOSE 8000
 
 # Command to run the application
 CMD poetry run serve
