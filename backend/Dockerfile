@@ -1,25 +1,21 @@
 FROM python:3.11-slim
 
-RUN pip install poetry
+RUN pip install poetr
 
 RUN poetry config virtualenvs.create false
 
 WORKDIR /code
 
-# Copy the necessary files
-COPY ./pyproject.toml ./README.md ./poetry.lock* ./
-COPY ./packages ./packages
+COPY ./pyproject.toml  ./
 
-# Install the dependencies
-RUN poetry install --no-interaction --no-ansi --no-root
+COPY ./package[s] ./packages
 
-# Copy the application files
+RUN poetry install  --no-interaction --no-ansi --no-root
+
 COPY ./app ./app
 
-# Install the application
 RUN poetry install --no-interaction --no-ansi
 
 EXPOSE 8080
 
-# Command to run the application
 CMD poetry run serve
