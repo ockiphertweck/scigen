@@ -1,9 +1,0 @@
-### 2. Research Evolution in the COVID-19 Era
-
-#### 2.1 Changes in Research Focus
-- **Shifts in Thematic Priorities**: The global research landscape has experienced significant shifts in thematic priorities due to the COVID-19 pandemic. There has been a surge in research related to virology, epidemiology, public health responses, and vaccine development.
-- **Emergence of COVID-19 Related Research Fields**: New interdisciplinary research fields have emerged, focusing on the intersections of COVID-19 with economics, education, mental health, and technology. This includes studies on the economic impacts of the pandemic, the effectiveness of remote learning, the psychological effects of lockdowns, and the development of new technologies for virus detection and contact tracing.
-
-#### 2.2 Adaptations in Research Methodologies
-- **Adjustments in Experimental and Field Research Methods**: Due to restrictions on physical gatherings and the need for social distancing, there has been a significant shift in how experimental and field research is conducted. Researchers have adapted by designing experiments that can be conducted remotely or with minimal human contact.
-- **Increased Reliance on Digital Tools and Remote Collaboration Technologies**: The pandemic has accelerated the adoption of digital tools and technologies for research. This includes the use of virtual laboratories, remote sensing technologies, and online collaboration platforms that enable scientists to conduct research, share data, and collaborate effectively despite geographical separations.
