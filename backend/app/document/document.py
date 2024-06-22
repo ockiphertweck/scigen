@@ -74,7 +74,7 @@ async def upload_file(
         )
         upload_service = DocumentUploadService()
         result = await upload_service.perform_action(data)
-        return {"result": "result"}
+        return {"result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
