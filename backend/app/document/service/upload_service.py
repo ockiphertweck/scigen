@@ -11,13 +11,14 @@ from dotenv import load_dotenv
 
 class DocumentUploadService(BaseService):
     class DocumentUploadModel(BaseModel):
+        file: UploadFile
         splitter: Splitter
         chunk_size: int
         chunk_overlap: int
         tokenizer_model_name: str
         schema_name: str
 
-    async def perform_action(self, data: DocumentUploadModel, file: UploadFile):
+    async def perform_action(self, data: DocumentUploadModel):
         from app.services.weaviate import WeaviateClient, create_vector_store
         from langchain_openai import OpenAIEmbeddings
         load_dotenv()

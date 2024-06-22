@@ -2,7 +2,7 @@ import os
 from typing import List
 from app.services.nougat import parsePdfToMardown, ping
 from dotenv import load_dotenv, find_dotenv
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 import requests
@@ -46,7 +46,14 @@ router = APIRouter()
              },
              status_code=status.HTTP_200_OK,
              tags=["Document Processing"])
-async def uploadDocument(file: UploadFile, data: DocumentUploadService.DocumentUploadModel):
+async def upload_file(
+    file: UploadFile = File(...),
+    splitter: Splitter = Form(Splitter.SEMANTIC_TEXT_SPLITTER_MD),
+    chunk_size: int = Form(2000),
+    chunk_overlap: int = Form(200),
+    tokenizer_model_name: str = Form("gpt-4"),
+    schema_name: str = Form("PH_Documents")
+):
     """
     Uploads a document, converts it to markdown, vectorizes it, and stores it in the database.
 
@@ -57,10 +64,18 @@ async def uploadDocument(file: UploadFile, data: DocumentUploadService.DocumentU
         A JSON response with status code 200 and a message indicating the successful conversion and storage of the document in the database.
     """
     try:
-
-        upload_service = DocumentUploadService()
-        result = await upload_service.perform_action(data, file)
-        return {"result": result}
+        data = DocumentUploadService.DocumentUploadModel(
+            file=file,
+            splitter=splitter,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            tokenizer_model_name=tokenizer_model_name,
+            schema_name=schema_name
+        )
+        print(data)
+       # upload_service = DocumentUploadService()
+       # result = await upload_service.perform_action(data)
+        return {"result": "result"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -1,23 +1,34 @@
+from enum import Enum
 import os
 import requests
+
+
+class Splitter(str, Enum):
+    """Enum of available text splitters"""
+    RECURSIVE_CHARACTER_MARKDOWN = "recursive_character_markdown"
+    SEMANTIC_TEXT_SPLITTER = "semantic_text_splitter"
+    SEMANTIC_TEXT_SPLITTER_MD = "semantic_text_splitter_md"
+    SEMANTIC_SPLIT = "semantic_split"
 
 
 def upload_document(file_path, url):
     with open(file_path, 'rb') as f:
         files = {'file': f}
         data = {
-            'splitter': 'SEMANTIC_TEXT_SPLITTER_MD',
-            'chunk_size': 2000,
+            'splitter': Splitter.SEMANTIC_TEXT_SPLITTER_MD.value,
+            'chunk_size': 3000,
             'chunk_overlap': 200,
             'tokenizer_model_name': 'gpt-4',
             'schema_name': 'PH_CEURWS'
         }
+        print(files)
+        print(data)
         response = requests.post(url, files=files, data=data)
         return response
 
 
 def iterate_and_upload(base_folder):
-    url = "http://localhost:5054/document/"
+    url = "http://localhost:8504/document/"
     for root, dirs, files in os.walk(base_folder):
         for dir_name in dirs:
             if dir_name.startswith("Vol-"):
