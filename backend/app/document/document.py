@@ -72,9 +72,8 @@ async def upload_file(
             tokenizer_model_name=tokenizer_model_name,
             schema_name=schema_name
         )
-        print(data)
-       # upload_service = DocumentUploadService()
-       # result = await upload_service.perform_action(data)
+        upload_service = DocumentUploadService()
+        result = await upload_service.perform_action(data)
         return {"result": "result"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
