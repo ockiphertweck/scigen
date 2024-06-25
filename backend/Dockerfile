@@ -12,18 +12,12 @@ WORKDIR /code
 # Copy necessary files
 COPY ./pyproject.toml ./README.md ./
 
-# Copy the packages directory
-COPY ./packages ./packages
 
 # Install dependencies without the root package
 RUN poetry install --no-interaction --no-ansi --no-root
 
 # Copy the application files
 COPY ./app ./app
-
-# Debug: List files in the /code directory and /code/app
-RUN ls -la /code
-RUN ls -la /code/app
 
 # Install the application
 RUN poetry install --no-interaction --no-ansi
