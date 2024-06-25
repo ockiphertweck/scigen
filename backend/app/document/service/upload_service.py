@@ -23,7 +23,6 @@ class DocumentUploadService(BaseService):
         from langchain_openai import OpenAIEmbeddings
         load_dotenv()
         try:
-            print(data)
             markdown_content = await parsePdfToMardown(data.file, NOUGAT_URL=os.getenv("NOUGAT_URL", ""))
             documents, references = split_text(markdown_content, data.splitter, splitter_options=SplitterOptions(
                 chunk_size=data.chunk_size, chunk_overlap=data.chunk_overlap, tokenizer_model_name=data.tokenizer_model_name), meta_data={"file_name": data.file.filename})
@@ -32,9 +31,9 @@ class DocumentUploadService(BaseService):
             embeddings = OpenAIEmbeddings()
             vectore_store = create_vector_store(
                 weaviate_client, embeddings=embeddings, index_name=data.schema_name, text_key="text")
-            vectore_store.add_documents(documents)
+            ids = vectore_store.add_documents(documents)
             return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Conversion successful and document stored in the database"})
         except Exception as e:
             error_message = str(e)
-            print(error_message)
+            print("ERROR in upload service: ", e)
             return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": error_message})

@@ -1,6 +1,8 @@
 from enum import Enum
 import re
 from typing import List, Tuple, Dict
+from app.chains import meta_data_chain
+from app.services.semantic_scholar import get_paper_title_search
 from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 from semantic_text_splitter import TextSplitter, MarkdownSplitter
 from semantic_split import SimilarSentenceSplitter, SentenceTransformersSimilarity, SpacySentenceSplitter
@@ -62,6 +64,39 @@ def split_text(text: str, splitter: Splitter, splitter_options: SplitterOptions,
         chunks = _semantic_split(data, splitter_options)
     else:
         raise ValueError("Invalid splitter option")
+
+    meta_data_chain_result = meta_data_chain.chain.invoke(
+        input={"context": chunks[0]})
+
+    sem_schol_data = get_paper_title_search(meta_data_chain_result["title"], [
+        "title",
+        "citationStyles",
+        "authors",
+        "venue",
+        "fieldsOfStudy",
+        "publicationDate",
+        "authors.url",
+        "authors.name",
+        "authors.affiliations",
+        "openAccessPdf"
+    ])
+
+    meta_data["title"] = meta_data_chain_result["title"]
+    meta_data["keywords"] = meta_data_chain_result["keywords"]
+    print("sem_schol_data: ", sem_schol_data)
+    if sem_schol_data is not None:
+        meta_data["authors"] = sem_schol_data["authors"]
+        meta_data["venue"] = sem_schol_data["venue"]
+        meta_data["fieldsOfStudy"] = sem_schol_data["fieldsOfStudy"]
+        meta_data["publicationDate"] = sem_schol_data["publicationDate"]
+        meta_data["paperId"] = sem_schol_data["paperId"]
+        meta_data["bibtex"] = sem_schol_data["citationStyles"]["bibtex"]
+        print("OpenAccessPdf: ", sem_schol_data["openAccessPdf"])
+        if sem_schol_data.get("openAccessPdf") and sem_schol_data["openAccessPdf"].get("url"):
+            meta_data["pdfUrl"] = sem_schol_data["openAccessPdf"]["url"]
+        else:
+            meta_data["pdfUrl"] = ""
+
     chunks += tables
     documents = _convert_to_langchain_document(chunks, meta_data)
     return documents, references

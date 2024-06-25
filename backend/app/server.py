@@ -3,7 +3,6 @@ from typing import Dict
 from app.services.nougat import parsePdfToMardown, ping
 from fastapi import FastAPI
 from app.document.document import router as document_router
-from app.paper.paper import router as paper_router
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
 import uvicorn
@@ -17,7 +16,6 @@ app = FastAPI(
 )
 
 app.include_router(document_router)
-app.include_router(paper_router)
 
 
 @app.get("/")
